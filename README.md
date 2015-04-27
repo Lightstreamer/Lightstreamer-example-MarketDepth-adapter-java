@@ -109,9 +109,9 @@ To build your own version of `LS_MarketDepth_adapters.jar`, instead of using the
 * Clone this project.
 * Get the `ls-adapter-interface.jar` file from the [latest Lightstreamer distribution](http://www.lightstreamer.com/download), and copy it into the `lib` folder.
 * Get the `log4j-1.2.17.jar` file from [Apache log4j](https://logging.apache.org/log4j/1.2/) and copy it into the `lib` folder.
-* Create the jar `LS_MarketDepth_adapters.jar` with something like these commands:
+* Create the jar `LS_MarketDepth_adapters.jar` with something like these commands (you have to create the temporary folder `tmp_classes`):
 ```sh
- >javac -source 1.7 -target 1.7 -nowarn -g -classpath compile_libs/log4j-1.2.17.jar;compile_libs/ls-adapter-interface/ls-adapter-interface.jar -sourcepath src -d tmp_classes src/com/lightstreamer/adapters/MarketDepthDemo/MarketDepthMetadataAdapter.java
+ >javac -source 1.6 -target 1.6 -nowarn -g -classpath lib/log4j-1.2.17.jar;lib/ls-adapter-interface.jar -sourcepath src -d tmp_classes src/com/lightstreamer/adapters/MarketDepthDemo/MarketDepthMetadataAdapter.java
  
  >jar cvf LS_MarketDepth_adapters.jar -C tmp_classes com
 ```

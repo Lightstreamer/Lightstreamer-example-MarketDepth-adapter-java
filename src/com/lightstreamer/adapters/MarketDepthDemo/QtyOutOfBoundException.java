@@ -19,24 +19,10 @@ package com.lightstreamer.adapters.MarketDepthDemo;
 public class QtyOutOfBoundException extends Exception {
 
     public QtyOutOfBoundException() {
-
+        super();
     }
 
-    public QtyOutOfBoundException(String message) {
-        super(message);
-    }
 
-    public QtyOutOfBoundException(Throwable cause) {
-        super(cause);
-    }
-
-    public QtyOutOfBoundException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public QtyOutOfBoundException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
     
     @Override
     public String getMessage() {
