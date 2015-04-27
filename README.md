@@ -21,7 +21,7 @@ The project is comprised of source code and a deployment example. The main eleme
 #### The Data Adapter
 
 The Data Adpter is implemented by the *MarketDepthDataAdapter* class. The class implement two interfaces:
-- *SmartDataProvider* that concerns relations with <b>Lightstreamer server<b>;
+- *SmartDataProvider* that concerns relations with <b>Lightstreamer server</b>;
 - *MarketMaker* that models a very simple set of possible events from the trading market.
 
 #### The Metadata Adapter
@@ -41,7 +41,7 @@ The stocks are listed below in ascending order (from slower to faster):
 - *AXY COMPANY Ltd*, Item name: "AXY_COMP";
 - *SuperFast Tech.*, Item name: "SF_TECH".
 
-Once a fixed number of executions has been reached, the stock simulates the "End of Day" phase, in which both the order books, for buy and sell, are cleaned up, and the reference price is recalculated (this phase lasts 15 seconds).
+Once a fixed number of executions has been reached, the stock simulates the "End of Day" phase, in which both the order books, for buy and sell, are cleaned up, and the reference price is recalculated (this phase lasts 15 seconds).<br>
 <br>
 See the source code comments for further details.
 
@@ -121,7 +121,7 @@ To build your own version of `LS_MarketDepth_adapters.jar`, instead of using the
 
 ### Clients Using This Adapter
 
-* [Lightstreamer - Basic Market Depth Demo - JavaScript Client](https://github.com/Weswit/Lightstreamer-example-MarketDepth-client-javascript)
+* [Lightstreamer - Market Depth Demo - JavaScript Client](https://github.com/Weswit/Lightstreamer-example-MarketDepth-client-javascript)
 
 ### Related Projects
 
