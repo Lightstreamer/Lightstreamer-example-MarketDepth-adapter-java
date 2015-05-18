@@ -18,17 +18,23 @@ package com.lightstreamer.adapters.MarketDepthDemo;
 
 public class PriceOutOfBoundException extends Exception {
 
-    private double ref = 0.0;
+    private double px = 0.0;
+    private boolean typeRef = false;
     
-    public PriceOutOfBoundException(double price) {
+    public PriceOutOfBoundException(double price, boolean t) {
         super();
-        this.ref = price;
+        this.px = price;
+        this.typeRef = t;
     }
     
     @Override
     public String getMessage() {
         
-        return "REJECT: invalid limit price (reference price:" + this.ref +").";
+        if (typeRef) {        
+            return "REJECT: invalid limit price (reference price:" + this.px +").";
+        } else {
+            return "REJECT: invalid limit price (last price:" + this.px +").";
+        }
     }
 
 }

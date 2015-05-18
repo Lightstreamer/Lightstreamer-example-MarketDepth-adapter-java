@@ -250,13 +250,15 @@ public class Stock {
     }
     
     private void checkPriceOrder(double orderPrice) throws PriceOutOfBoundException {
-        if ( orderPrice > (this.referencePrice*1.26) ) {
-            throw new PriceOutOfBoundException(this.referencePrice);
-        } else if ( orderPrice < (this.referencePrice*0.74) ) {
-            throw new PriceOutOfBoundException(this.referencePrice);
+        
+        if ( orderPrice > (this.referencePrice*1.50) ) {
+            throw new PriceOutOfBoundException(this.referencePrice, true);
+        } else if ( orderPrice < (this.referencePrice*0.50) ) {
+            throw new PriceOutOfBoundException(this.referencePrice, true);
         } else {
             return ;
         }
+        
     }
     
     private void checkQtyOrder(long qty) throws QtyOutOfBoundException {

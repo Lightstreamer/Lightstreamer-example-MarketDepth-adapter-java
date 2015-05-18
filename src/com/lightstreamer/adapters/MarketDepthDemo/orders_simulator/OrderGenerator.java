@@ -85,9 +85,11 @@ public class OrderGenerator {
         if ( this.myGenerator.nextDouble() < 0.5 ) {
             // BUY ORDER
             
-            rnd = myGenerator.nextDouble() + 0.1;
+            //rnd = myGenerator.nextDouble() + 0.1;
+            rnd = myGenerator.nextGaussian() + 1.0;
             while ( (rnd > 1.1) || (rnd < 0.75) ) {
-                rnd = myGenerator.nextDouble() + 0.1;    
+                //rnd = myGenerator.nextDouble() + 0.1;
+                rnd = myGenerator.nextGaussian() + 1.0;
             }
             newPrice = Math.ceil(base*rnd)/100;
             if (newPrice < 0.20) {
@@ -100,9 +102,11 @@ public class OrderGenerator {
         } else {
             // SELL ORDER
             
-            rnd = myGenerator.nextDouble() + 0.25;
+            //rnd = myGenerator.nextDouble() + 0.25;
+            rnd = myGenerator.nextGaussian() + 1.0;
             while ( (rnd > 1.25) || (rnd < 0.9) ) {
-                rnd = myGenerator.nextDouble() + 0.25;    
+                //rnd = myGenerator.nextDouble() + 0.25;
+                rnd = myGenerator.nextGaussian() + 1.0;
             }
             newPrice = Math.ceil(base*rnd)/100;
             if (newPrice < 0.20) {
