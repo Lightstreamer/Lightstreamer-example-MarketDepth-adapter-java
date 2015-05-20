@@ -210,9 +210,9 @@ public class Stock {
     }
     
     public void newDemoProposal(OrderBase newOrder) {
-        
-        mathcingEngine(newOrder);
-        
+        synchronized (myGenerator) {
+            mathcingEngine(newOrder);   
+        }
     }
     
     public void newTradingProposal(long qty, double price, boolean buy) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException {
@@ -485,6 +485,10 @@ public class Stock {
             
             this.myGenerator.stopSimulation(false);
             ExecList.clear();
+            
+            // update reference price with the last price
+            this.referencePrice = price;
+            this.myGenerator.setBasePrice(price);
             
             BuyOrders.clear();
             SellOrders.clear();

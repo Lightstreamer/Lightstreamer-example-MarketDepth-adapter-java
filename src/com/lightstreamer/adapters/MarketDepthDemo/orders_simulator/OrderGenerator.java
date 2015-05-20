@@ -176,12 +176,11 @@ public class OrderGenerator {
                 @Override
                 public void run() {
                     int nextWaitTime;
-                    synchronized (this) {
-                        OrderBase ob = negOrder();
-                            stockbase.newDemoProposal(ob);
                     
-                            nextWaitTime = (int)Math.ceil(myGenerator.nextDouble()*frequencyFactor);
-                    }
+                    OrderBase ob = negOrder();
+                    stockbase.newDemoProposal(ob);
+                    
+                    nextWaitTime = (int)Math.ceil(myGenerator.nextDouble()*frequencyFactor);
                     scheduleGenerator(nextWaitTime);
                 }
             }, waitTime);
