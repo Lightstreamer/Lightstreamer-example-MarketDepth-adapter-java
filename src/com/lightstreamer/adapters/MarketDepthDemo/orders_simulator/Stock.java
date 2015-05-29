@@ -210,8 +210,12 @@ public class Stock {
     }
     
     public void newDemoProposal(OrderBase newOrder) {
-        synchronized (myGenerator) {
-            mathcingEngine(newOrder);   
+        try {
+            synchronized (myGenerator) {
+                mathcingEngine(newOrder);   
+            }
+        } catch (Exception e) {
+            this.logger.error("Unexpected error in the proposal handling (" + e.getMessage() + ").");
         }
     }
     

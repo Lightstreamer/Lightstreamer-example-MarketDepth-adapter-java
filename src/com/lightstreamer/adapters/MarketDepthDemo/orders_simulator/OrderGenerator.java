@@ -172,18 +172,23 @@ public class OrderGenerator {
     private void scheduleGenerator(int waitTime) {
         
         if ( active ) {
+            
             dispatcher.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     int nextWaitTime;
-                    
-                    OrderBase ob = negOrder();
-                    stockbase.newDemoProposal(ob);
+                    try {
+                        OrderBase ob = negOrder();
+                        stockbase.newDemoProposal(ob);
+                    } catch (Exception e) {
+                        // Skip.
+                    }
                     
                     nextWaitTime = (int)Math.ceil(myGenerator.nextDouble()*frequencyFactor);
                     scheduleGenerator(nextWaitTime);
                 }
             }, waitTime);
+            
         }
     }
 
