@@ -3,7 +3,7 @@
 The *Market Depth Demo* is a very simple market depth application based on Lightstreamer for its real-time communication needs.<br>
 
 This project includes the server-side part of this demo, the Metadata and Data Adapters implementation.
-The client-side part of this demo, a web client front-end, is covered in this project: [Lightstreamer - Market Depth Demo - HTML Client](https://github.com/Weswit/Lightstreamer-example-MarketDepth-client-javascript).
+The client-side part of this demo, a web client front-end, is covered in this project: [Lightstreamer - Market Depth Demo - HTML Client](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-client-javascript).
 
 ## Details
 
@@ -26,7 +26,7 @@ The Data Adpter is implemented by the *MarketDepthDataAdapter* class. The class 
 
 #### The Metadata Adapter
 
-The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Weswit/Lightstreamer-example-ReusableMetadata-adapter-java) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
+The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-example-ReusableMetadata-adapter-java) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
 The communication to the Market Orders Simulator, through the Data Adapter, is handled here.
 
 It should not be used as a reference for a real case of client-originated message handling, as no guaranteed delivery and no clustering support is shown.
@@ -98,14 +98,14 @@ Please refer [here](http://www.lightstreamer.com/docs/base/General%20Concepts.pd
 
 If you want to install a version of this demo in your local Lightstreamer Server, follow these steps:
 * Download *Lightstreamer Server* (Lightstreamer Server comes with a free non-expiring demo license for 20 connected users) from [Lightstreamer Download page](http://www.lightstreamer.com/download.htm), and install it, as explained in the `GETTING_STARTED.TXT` file in the installation home directory.
-* Get the `deploy.zip` file of the [latest release](https://github.com/Weswit/Lightstreamer-example-MarketDepth-adapter-java/releases), unzip it, and copy the just unzipped `MarketDepth` folder into the `adapters` folder of your Lightstreamer Server installation.
+* Get the `deploy.zip` file of the [latest release](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/releases), unzip it, and copy the just unzipped `MarketDepth` folder into the `adapters` folder of your Lightstreamer Server installation.
 * Launch Lightstreamer Server.
-* Test the Adapter, launching one of the clients listed in [Clients Using This Adapter](https://github.com/Weswit/Lightstreamer-example-MarketDepth-adapter-java#clients-using-this-adapter).
+* Test the Adapter, launching one of the clients listed in [Clients Using This Adapter](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java#clients-using-this-adapter).
 
 
 ## Build
 
-To build your own version of `LS_MarketDepth_adapters.jar`, instead of using the one provided in the `deploy.zip` file from the [Install](https://github.com/Weswit/Lightstreamer-example-MarketDepth-adapter-java#install) section above, follow these steps:
+To build your own version of `LS_MarketDepth_adapters.jar`, instead of using the one provided in the `deploy.zip` file from the [Install](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java#install) section above, follow these steps:
 * Clone this project.
 * Get the `ls-adapter-interface.jar` file from the [latest Lightstreamer distribution](http://www.lightstreamer.com/download), and copy it into the `lib` folder.
 * Get the `log4j-1.2.17.jar` file from [Apache log4j](https://logging.apache.org/log4j/1.2/) and copy it into the `lib` folder.
@@ -121,13 +121,13 @@ To build your own version of `LS_MarketDepth_adapters.jar`, instead of using the
 
 ### Clients Using This Adapter
 
-* [Lightstreamer - Market Depth Demo - JavaScript Client](https://github.com/Weswit/Lightstreamer-example-MarketDepth-client-javascript)
+* [Lightstreamer - Market Depth Demo - JavaScript Client](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-client-javascript)
 
 ### Related Projects
 
-* [Lightstreamer - Reusable Metadata Adapters - Java Adapter](https://github.com/Weswit/Lightstreamer-example-ReusableMetadata-adapter-java)
-* [Lightstreamer - Stock-List Demos - HTML Clients](https://github.com/Weswit/Lightstreamer-example-StockList-client-javascript)
-* [Lightstreamer - Portfolio Demos - HTML Clients](https://github.com/Weswit/Lightstreamer-example-Portfolio-client-javascript)
+* [Lightstreamer - Reusable Metadata Adapters - Java Adapter](https://github.com/Lightstreamer/Lightstreamer-example-ReusableMetadata-adapter-java)
+* [Lightstreamer - Stock-List Demos - HTML Clients](https://github.com/Lightstreamer/Lightstreamer-example-StockList-client-javascript)
+* [Lightstreamer - Portfolio Demos - HTML Clients](https://github.com/Lightstreamer/Lightstreamer-example-Portfolio-client-javascript)
 
 ## Lightstreamer Compatibility Notes
 
