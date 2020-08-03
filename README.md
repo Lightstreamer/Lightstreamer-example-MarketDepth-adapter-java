@@ -54,13 +54,6 @@ The `adapters.xml` file for the Market Depth Demo, should look like:
 <?xml version="1.0"?>
 <adapters_conf id="MARKETDEPTH">
 
-    <!--
-      Not all configuration options of an Adapter Set are exposed by this file. 
-      You can easily expand your configurations using the generic template, 
-      `DOCS-SDKs/sdk_adapter_java_inprocess/doc/adapter_conf_template/adapters.xml`,
-      as a reference.
-    -->
-    
     <metadata_adapter_initialised_first>Y</metadata_adapter_initialised_first>
 
     <metadata_provider>
@@ -90,7 +83,7 @@ The `adapters.xml` file for the Market Depth Demo, should look like:
 ```
 
 <i>NOTE: not all configuration options of an Adapter Set are exposed by the file suggested above. 
-You can easily expand your configurations using the generic template, `DOCS-SDKs/sdk_adapter_java_inprocess/doc/adapter_conf_template/adapters.xml`, as a reference.</i><br>
+You can easily expand your configurations using the generic template, see the [Java In-Process Adapter Interface Project](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#configuration) for details.</i><br>
 <br>
 Please refer [here](https://lightstreamer.com/docs/ls-server/latest/General%20Concepts.pdf) for more details about Lightstreamer Adapters.
 
