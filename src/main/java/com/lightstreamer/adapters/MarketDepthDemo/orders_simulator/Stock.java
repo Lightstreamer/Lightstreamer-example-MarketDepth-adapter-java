@@ -25,7 +25,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.lightstreamer.adapters.MarketDepthDemo.Constants;
 import com.lightstreamer.adapters.MarketDepthDemo.MarketMaker;

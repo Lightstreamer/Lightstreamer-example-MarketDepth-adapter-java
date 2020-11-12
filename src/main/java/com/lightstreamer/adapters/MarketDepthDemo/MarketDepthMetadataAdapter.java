@@ -19,8 +19,8 @@ package com.lightstreamer.adapters.MarketDepthDemo;
 import java.util.Map;
 import java.io.File;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lightstreamer.adapters.metadata.LiteralBasedProvider;
 import com.lightstreamer.interfaces.metadata.CreditsException;
@@ -35,18 +35,8 @@ public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
     
     @Override
     public void init(Map params, File configDir) throws MetadataProviderException {
-        String logConfig = (String) params.get("log_config");
-        if (logConfig != null) {
-            File logConfigFile = new File(configDir, logConfig);
-            String logRefresh = (String) params.get("log_config_refresh_seconds");
-            if (logRefresh != null) {
-                DOMConfigurator.configureAndWatch(logConfigFile.getAbsolutePath(), Integer.parseInt(logRefresh) * 1000);
-            } else {
-                DOMConfigurator.configure(logConfigFile.getAbsolutePath());
-            }
-        } //else the bridge to logback is expected
         
-        logger = Logger.getLogger(Constants.LOGGER_CAT);
+        logger = LogManager.getLogger(Constants.LOGGER_CAT);
         
         Constants.init(params);
         

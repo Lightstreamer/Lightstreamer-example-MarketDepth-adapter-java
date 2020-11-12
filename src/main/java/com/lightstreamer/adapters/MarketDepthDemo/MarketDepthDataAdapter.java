@@ -24,7 +24,8 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lightstreamer.interfaces.data.DataProviderException;
 import com.lightstreamer.interfaces.data.ItemEventListener;
@@ -45,7 +46,7 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
     @Override
     public void init(Map params, File configDir) throws DataProviderException {
         
-        logger = Logger.getLogger(Constants.LOGGER_CAT);
+        logger = LogManager.getLogger(Constants.LOGGER_CAT);
         
         availableStocks = new HashMap<String, Stock>();
         
