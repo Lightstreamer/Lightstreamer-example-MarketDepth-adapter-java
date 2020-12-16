@@ -76,16 +76,26 @@ public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
             throw new CreditsException(-10026, qoobe.getMessage());
         } catch (RejectProposalException rpe) {
             throw new CreditsException(-10027, rpe.getMessage());
+        } catch (NumberFormatException nfe) {
+            throw new CreditsException(-10027, "Number Format Error " + nfe.getMessage());
         }
         
         return ;
     }
     
-    private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException {
+    private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException, NumberFormatException {
         
         if ( splits.length == 4 ) {
-            logger.info("New trading proposal: " + splits[0] + ", " + splits[1] + ", " + splits[2]);    
-            dataAdapter.newTradingProposal(splits[1], new Double(splits[3]).doubleValue(), new Long(splits[2]).longValue(), (splits[0].equals("BUY")));
+            double priceP = 0.0;
+            long qtyP = 0;
+
+            logger.info("New trading proposal: " + splits[0] + ", " + splits[1] + ", " + splits[2]);   
+
+            priceP = new Double(splits[3]).doubleValue();
+
+            qtyP = new Long(splits[2]).longValue();
+
+            dataAdapter.newTradingProposal(splits[1], priceP, qtyP, (splits[0].equals("BUY")));
         } else {
             logger.warn("Wrong formatted message received. No pieces: " + splits.length);
         }
