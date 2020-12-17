@@ -131,11 +131,16 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
     }
     
     private void sendBuyOrderSnapshot(Iterator<OrderBuy> list, Object handle) {
-        final Object h = handle;
+        
+        if ( handle == null ) {
+            return ;
+        }
         if ( listener == null ) {
             return ;
         }
-        
+
+        final Object h = handle;
+
         while ( list.hasNext() ) {
             OrderBuy ob = list.next();
             final HashMap<String, String> update = new HashMap<String, String>();
@@ -161,10 +166,15 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
     }
 
     private void sendSellOrderSnapshot(Iterator<OrderSell> list, Object handle) {
-        final Object h = handle;
+        
+        if ( handle == null ) {
+            return ;
+        }
         if ( listener == null ) {
             return ;
         }
+        
+        final Object h = handle;
         
         while ( list.hasNext() ) {
             OrderSell os = list.next();
@@ -206,6 +216,10 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
             Stock myStock = availableStocks.get(symbol);
             final HashMap<String, String> update = new HashMap<String, String>();
             
+            if ( myStock.getLs_handle() == null ) {
+                return ;
+            }
+
             update.put("command", "ADD");
             update.put("key", ""+ob.getPrice());
             update.put("qty", ""+ob.getQuantity());
@@ -213,11 +227,15 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
             if (ob instanceof OrderBuy ) {
                 logger.debug("ADD command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                if ( myStock.getLs_buy_handle() != null ) {
+                    listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                }    
             } else {
                 logger.debug("ADD command for sell order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                if ( myStock.getLs_sell_handle() != null ) {
+                    listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                }
             }
             
             listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
@@ -229,7 +247,7 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
         if (availableStocks.containsKey(symbol)) {
             Stock myStock = availableStocks.get(symbol);
             final HashMap<String, String> update = new HashMap<String, String>();
-            
+
             update.put("command", "UPDATE");
             update.put("key", ""+ob.getPrice());
             update.put("qty", ""+ob.getQuantity());
@@ -237,12 +255,15 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
             if (ob instanceof OrderBuy ) {
                 logger.debug("UPDATE command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                if ( myStock.getLs_buy_handle() != null ) {
+                    listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                }
             } else {
                                 
                 logger.debug("UPDATE command for sell order " + ob.getPrice() + " x " + ob.getQuantity());
-                
-                listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                if ( myStock.getLs_sell_handle() != null ) {
+                    listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                }
             }
         }
     }
@@ -253,17 +274,25 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
             Stock myStock = availableStocks.get(symbol);
             final HashMap<String, String> update = new HashMap<String, String>();
         
+            if ( myStock.getLs_handle() == null ) {
+                return ;
+            }
+
             update.put("command", "DELETE");
             update.put("key", ""+ ob.getPrice());
         
             if (ob instanceof OrderSell ) {
                 logger.debug("DELETE command for sell order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                if ( myStock.getLs_sell_handle() != null ) {
+                    listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                }
             } else {
                 logger.debug("DELETE command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                if ( myStock.getLs_buy_handle() != null ) {
+                    listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                }
             }
             
             listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
@@ -276,7 +305,10 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
         
         logger.debug("Syn update for " + symbol + ".");
         
-        listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+        if ( myStock.getLs_handle() != null ) {
+            listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+        }
+        
         // For Time&Sales push of the new deal.
     }
     
@@ -285,7 +317,9 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
         Stock myStock = availableStocks.get(symbol);
         
         if (myStock != null ) {
-            listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+            if ( myStock.getLs_handle() != null ) {
+                listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+            }
         
             if ( myStock.getLs_buy_handle() != null ) {
                 logger.info("Buy side " + myStock.getSymbol() + ": clearSnapshot.");
