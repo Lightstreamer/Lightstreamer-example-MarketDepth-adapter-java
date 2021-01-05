@@ -26,7 +26,7 @@ The Data Adpter is implemented by the *MarketDepthDataAdapter* class. The class 
 
 #### The Metadata Adapter
 
-The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-example-ReusableMetadata-adapter-java) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
+The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
 The communication to the Market Orders Simulator, through the Data Adapter, is handled here.
 
 It should not be used as a reference for a real case of client-originated message handling, as no guaranteed delivery and no clustering support is shown.
@@ -115,7 +115,7 @@ Assuming Maven is installed and available in your path you can build the demo by
 
 ### Related Projects
 
-* [Lightstreamer - Reusable Metadata Adapters - Java Adapter](https://github.com/Lightstreamer/Lightstreamer-example-ReusableMetadata-adapter-java)
+* [LiteralBasedProvider Metadata Adapter](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter)
 * [Lightstreamer - Stock-List Demos - HTML Clients](https://github.com/Lightstreamer/Lightstreamer-example-StockList-client-javascript)
 * [Lightstreamer - Portfolio Demos - HTML Clients](https://github.com/Lightstreamer/Lightstreamer-example-Portfolio-client-javascript)
 
