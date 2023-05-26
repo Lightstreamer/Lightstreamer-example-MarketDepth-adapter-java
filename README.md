@@ -89,12 +89,12 @@ If you want to install a version of this demo in your local Lightstreamer Server
 * Get the `deploy.zip` file of the [latest release](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/releases), unzip it, and copy the just unzipped `MarketDepthDemo` folder into the `adapters` folder of your Lightstreamer Server installation.
 * [Optional] Customize the logging settings in log4j configuration file: `MarketDepthDemo/classes/log4j2.xml`.
 * Launch Lightstreamer Server.
-* Test the Adapter, launching one of the clients listed in [Clients Using This Adapter](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java#clients-using-this-adapter).
+* Test the Adapter, launching one of the clients listed in [Clients Using This Adapter](#clients-using-this-adapter).
 
 
 ## Build
 
-To build your own version of `example-MarketDepth-adapter-java-0.0.1-SNAPSHOT.jar` instead of using the one provided in the `deploy.zip` file from the [Install](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java#install) section above, you have two options:
+To build your own version of `example-MarketDepth-adapter-java-x.y.z-SNAPSHOT.jar` instead of using the one provided in the `deploy.zip` file from the [Install](#install) section above, you have two options:
 either use [Maven](https://maven.apache.org/) (or other build tools) to take care of dependencies and building (recommended) or gather the necessary jars yourself and build it manually.
 For the sake of simplicity only the Maven case is detailed here.
 
