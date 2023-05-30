@@ -26,7 +26,7 @@ The Data Adpter is implemented by the *MarketDepthDataAdapter* class. The class 
 
 #### The Metadata Adapter
 
-The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess/tree/v7.4.1#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
+The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
 The communication to the Market Orders Simulator, through the Data Adapter, is handled here.
 
 It should not be used as a reference for a real case of client-originated message handling, as no guaranteed delivery and no clustering support is shown.
@@ -78,15 +78,15 @@ The `adapters.xml` file for the Market Depth Demo, should look like:
 ```
 
 <i>NOTE: not all configuration options of an Adapter Set are exposed by the file suggested above. 
-You can easily expand your configurations using the generic template, see the [Java In-Process Adapter Interface Project](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess/tree/v7.4.1#configuration) for details.</i><br>
+You can easily expand your configurations using the generic template, see the [Java In-Process Adapter Interface Project](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#configuration) for details.</i><br>
 <br>
-Please refer [here](https://lightstreamer.com/docs/ls-server/latest_7_3/General%20Concepts.pdf) for more details about Lightstreamer Adapters.
+Please refer [here](https://lightstreamer.com/docs/ls-server/latest/General%20Concepts.pdf) for more details about Lightstreamer Adapters.
 
 ## Install
 
 If you want to install a version of this demo in your local Lightstreamer Server, follow these steps:
 * Download *Lightstreamer Server* (Lightstreamer Server comes with a free non-expiring demo license for 20 connected users) from [Lightstreamer Download page](https://lightstreamer.com/download/), and install it, as explained in the `GETTING_STARTED.TXT` file in the installation home directory.
-* Get the `deploy.zip` file of the ["Release for Lightstreamer 7.3" release](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/releases), unzip it, and copy the just unzipped `MarketDepthDemo` folder into the `adapters` folder of your Lightstreamer Server installation.
+* Get the `deploy.zip` file of the [latest release](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/releases), unzip it, and copy the just unzipped `MarketDepthDemo` folder into the `adapters` folder of your Lightstreamer Server installation.
 * [Optional] Customize the logging settings in log4j configuration file: `MarketDepthDemo/classes/log4j2.xml`.
 * Launch Lightstreamer Server.
 * Test the Adapter, launching one of the clients listed in [Clients Using This Adapter](#clients-using-this-adapter).
@@ -121,5 +121,6 @@ Assuming Maven is installed and available in your path you can build the demo by
 
 ## Lightstreamer Compatibility Notes
 
-- Compatible with Lightstreamer SDK for Java In-Process Adapters version 7.3 to 7.4.
+- Compatible with Lightstreamer SDK for Java In-Process Adapters since version 8.0.
+- For a version of this example compatible with Lightstreamer SDK for Java Adapters versions 7.3 to 7.4, please refer to [this tag](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/tree/last_for_interface_7.4.x).
 - For a version of this example compatible with Lightstreamer SDK for Java Adapters version 6.0, please refer to [this tag](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/tree/pre_mvn).
