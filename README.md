@@ -20,13 +20,13 @@ The project is comprised of source code and a deployment example. The main eleme
 
 #### The Data Adapter
 
-The Data Adpter is implemented by the *MarketDepthDataAdapter* class. The class implement two interfaces:
+The Data Adapter is implemented by the *MarketDepthDataAdapter* class. The class implement two interfaces:
 - *SmartDataProvider* that concerns relations with <b>Lightstreamer server</b>;
 - *MarketMaker* that models a very simple set of possible events from the trading market.
 
 #### The Metadata Adapter
 
-The Metadata Adpter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
+The Metadata Adapter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
 The communication to the Market Orders Simulator, through the Data Adapter, is handled here.
 
 It should not be used as a reference for a real case of client-originated message handling, as no guaranteed delivery and no clustering support is shown.
@@ -59,18 +59,24 @@ The `adapters.xml` file for the Market Depth Demo, should look like:
     <metadata_provider>
         <adapter_class>com.lightstreamer.adapters.MarketDepthDemo.MarketDepthMetadataAdapter</adapter_class>
         
+        <!-- configure the dedicated pool for notifyUserMessage call, see source code of MarketDepthMetadataAdapter -->
+        <messages_pool>
+            <max_pending_requests>100</max_pending_requests>
+            <max_queue>100</max_queue>
+        </messages_pool>
+
         <param name="RND_GENERATOR_SUPERFAST">70</param>
-		  <param name="RND_GENERATOR_FAST">700</param>
-		  <param name="RND_GENERATOR_REGULAR">7000</param>
-		  <param name="RND_GENERATOR_SLOW">35000</param>
-		  
-		  <!-- Number of executions after which the "End Of Day" starts. -->
-		  <param name="TRADING_DAY_LASTING">5000</param>
+        <param name="RND_GENERATOR_FAST">700</param>
+        <param name="RND_GENERATOR_REGULAR">7000</param>
+        <param name="RND_GENERATOR_SLOW">35000</param>
+
+        <!-- Number of executions after which the "End Of Day" starts. -->
+        <param name="TRADING_DAY_LASTING">5000</param>
         
     </metadata_provider>
     
     <data_provider>
-	 
+    
         <adapter_class>com.lightstreamer.adapters.MarketDepthDemo.MarketDepthDataAdapter</adapter_class>
           
     </data_provider>

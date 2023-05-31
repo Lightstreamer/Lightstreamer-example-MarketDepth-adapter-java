@@ -17,6 +17,10 @@
 package com.lightstreamer.adapters.MarketDepthDemo;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.io.File;
 
 import org.apache.logging.log4j.LogManager;
@@ -57,30 +61,43 @@ public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
     public boolean wantsTablesNotification(java.lang.String user) {
         return false;
     }
-    
+
+    private static ExecutorService messageProcessingPool = Executors.newCachedThreadPool();
+
     @Override
-    public void notifyUserMessage(String user, String session, String message) throws CreditsException, NotificationException {
-        
+    public CompletionStage<String> notifyUserMessage(String user, String session, String message) throws CreditsException, NotificationException {
+
+        //NOTE: since the order processing is potentially blocking (in a real scenario), we have 
+        //configured a dedicated ExecutorService. Moreover, to provide backpressure to the Server
+        //when the number of pending operations is too high, we have properly configured the
+        //messages thread pool in the adapters.xml configuration file for this adapter.
+
         if (message == null) {
             logger.warn("Null message received");
             throw new NotificationException("Null message received");
         }
         
-        String[] pieces = message.split("\\|");
-            
-        try {
-            this.handlePortfolioMessage(pieces);
-        } catch (PriceOutOfBoundException poobe) {
-            throw new CreditsException(-10025, poobe.getMessage());
-        } catch (QtyOutOfBoundException qoobe) {
-            throw new CreditsException(-10026, qoobe.getMessage());
-        } catch (RejectProposalException rpe) {
-            throw new CreditsException(-10027, rpe.getMessage());
-        } catch (NumberFormatException nfe) {
-            throw new CreditsException(-10027, "Number Format Error " + nfe.getMessage());
-        }
-        
-        return ;
+        CompletableFuture<String> future = new CompletableFuture<>();
+        messageProcessingPool.execute(() -> {
+            try {
+                String[] pieces = message.split("\\|");
+                this.handlePortfolioMessage(pieces);
+                future.complete(null);
+            } catch (PriceOutOfBoundException poobe) {
+                future.completeExceptionally(new CreditsException(-10025, poobe.getMessage()));
+            } catch (QtyOutOfBoundException qoobe) {
+                future.completeExceptionally(new CreditsException(-10026, qoobe.getMessage()));
+            } catch (RejectProposalException rpe) {
+                future.completeExceptionally(new CreditsException(-10027, rpe.getMessage()));
+            } catch (NumberFormatException nfe) {
+                future.completeExceptionally(new CreditsException(-10027, "Number Format Error " + nfe.getMessage()));
+            } catch (Throwable t) {
+                future.completeExceptionally(t);
+            }
+            assert (future.isDone());
+        });
+
+        return future;
     }
     
     private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException, NumberFormatException {
