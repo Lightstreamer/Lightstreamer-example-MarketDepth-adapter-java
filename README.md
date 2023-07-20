@@ -3,7 +3,7 @@
 The *Market Depth Demo* is a very simple market depth application based on Lightstreamer for its real-time communication needs.<br>
 
 This project includes the server-side part of this demo, the Metadata and Data Adapters implementation.
-The client-side part of this demo, a web client front-end, is covered in this project: [Lightstreamer - Market Depth Demo - HTML Client](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-client-javascript).
+The client-side part of this demo, a web client front-end, is covered in this project: [Lightstreamer - Market Depth Demo - HTML Client](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-client-javascript/tree/last_without_order_response).
 
 ## Details
 
@@ -117,7 +117,7 @@ Assuming Maven is installed and available in your path you can build the demo by
 
 ### Clients Using This Adapter
 
-* [Lightstreamer - Market Depth Demo - JavaScript Client](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-client-javascript)
+* [Lightstreamer - Market Depth Demo - JavaScript Client](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-client-javascript/tree/last_without_order_response)
 
 ### Related Projects
 
