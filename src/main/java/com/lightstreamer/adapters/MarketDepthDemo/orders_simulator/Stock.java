@@ -224,7 +224,7 @@ public class Stock {
             OrderBase newOrder;
             
             if ( this.tradingPhase.equals("End Of Day") ) {
-                throw new RejectProposalException();
+                throw new RejectProposalException("Market closed");
             }
             
             checkPriceOrder(price);
@@ -237,7 +237,6 @@ public class Stock {
             
             mathcingEngine(newOrder);
         }
-        return ;
     }
     
 

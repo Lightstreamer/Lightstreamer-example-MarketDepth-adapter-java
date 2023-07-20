@@ -18,8 +18,8 @@ package com.lightstreamer.adapters.MarketDepthDemo;
 
 public class RejectProposalException extends Exception {
 
-    public RejectProposalException() {
-        super();
+    public RejectProposalException(String msg) {
+        super(msg);
     }
 
     @Override

@@ -205,9 +205,9 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
             Stock myStock = availableStocks.get(symbol);
             
             myStock.newTradingProposal(qty, price, buy);
+        } else {
+            throw new RejectProposalException("Symbol not available");
         }
-        
-        return ;
     }
     
     @Override

@@ -99,7 +99,7 @@ public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
         return future;
     }
     
-    private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException, NumberFormatException {
+    private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException, NumberFormatException, NotificationException {
         
         if ( splits.length == 4 ) {
             double priceP = 0.0;
@@ -111,12 +111,16 @@ public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
 
             qtyP = new Long(splits[2]).longValue();
 
-            dataAdapter.newTradingProposal(splits[1], priceP, qtyP, (splits[0].equals("BUY")));
+            String op = splits[0];
+            if (op.equals("BUY") || op.equals("SELL")) {
+                dataAdapter.newTradingProposal(splits[1], priceP, qtyP, op.equals("BUY"));
+            } else {
+                throw new NotificationException("Wrong operation received");
+            }
         } else {
             logger.warn("Wrong formatted message received. No pieces: " + splits.length);
+            throw new NotificationException("Wrong message received");
         }
-        
-        return ;
     }
 
 }
