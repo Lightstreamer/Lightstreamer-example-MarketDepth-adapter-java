@@ -117,7 +117,7 @@ public class Stock {
         
         generator = new Random(System.currentTimeMillis()*rnd_gen);
                 
-        this.referencePrice = Math.floor(generator.nextDouble() * 15000)/100;
+        this.referencePrice = Math.floor(generator.nextDouble() * 15000)/100 + 1;
         
         this.logger.info("Stock " + this.shortDescription + " reference price: " + this.referencePrice);
         
@@ -380,10 +380,8 @@ public class Stock {
             }
             
         } else {
-            return ;
+            assert (false);
         }
-        
-        return ;
     }
     
     private long executionS(Double sellLevel, OrderBase newOrder) {
