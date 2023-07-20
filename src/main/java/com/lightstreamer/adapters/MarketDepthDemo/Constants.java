@@ -23,6 +23,8 @@ public class Constants {
     
     public static final long MAX_QTY = 100000;
     
+    public static final long FULL_BUCKET = 1000000;
+
     public static final String BUY_SUFFIX = "_BUYSIDE";
     
     public static final String SELL_SUFFIX = "_SELLSIDE";

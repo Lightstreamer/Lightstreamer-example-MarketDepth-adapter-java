@@ -283,7 +283,7 @@ public class Stock {
                     Double key = new Double(newOrder.getPrice());
                 
                     if ( BuyOrders.containsKey(key)) {
-                        if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < 1000000 ) {
+                        if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
                             ((OrderBuy)(BuyOrders.get(key))).add(newOrder);
                             listener.orderLevelChange(symbol, (OrderBuy)(BuyOrders.get(key)));
                         }
@@ -316,7 +316,7 @@ public class Stock {
                         Double key = new Double(newOrder.getPrice());
                                                 
                         if ( BuyOrders.containsKey(key)) {
-                            if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < 1000000 ) {
+                            if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
                                 ((OrderBuy)(BuyOrders.get(key))).add(newOrder);
                                 listener.orderLevelChange(symbol, (OrderBuy)(BuyOrders.get(key)));   
                             }
@@ -338,7 +338,7 @@ public class Stock {
                     Double key = new Double(newOrder.getPrice());
                     
                     if ( SellOrders.containsKey(key)) {
-                        if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < 1000000 ) {
+                        if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
                             ((OrderSell)(SellOrders.get(key))).add(newOrder);
                             listener.orderLevelChange(symbol, (OrderSell)(SellOrders.get(key)));
                         }
@@ -366,7 +366,7 @@ public class Stock {
                         Double key = new Double(newOrder.getPrice());
                                                 
                         if ( SellOrders.containsKey(key)) {
-                            if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < 1000000 ) {
+                            if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
                                 ((OrderSell)(SellOrders.get(key))).add(newOrder);
                                 listener.orderLevelChange(symbol, (OrderSell)(SellOrders.get(key)));
                             }
