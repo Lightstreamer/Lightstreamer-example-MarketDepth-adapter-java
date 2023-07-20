@@ -81,7 +81,7 @@ public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
             try {
                 String[] pieces = message.split("\\|");
                 this.handlePortfolioMessage(pieces);
-                future.complete(null);
+                future.complete("SUBMITTED");
             } catch (PriceOutOfBoundException poobe) {
                 future.completeExceptionally(new CreditsException(-10025, poobe.getMessage()));
             } catch (QtyOutOfBoundException qoobe) {

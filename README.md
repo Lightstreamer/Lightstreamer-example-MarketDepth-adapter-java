@@ -27,6 +27,7 @@ The Data Adapter is implemented by the *MarketDepthDataAdapter* class. The class
 #### The Metadata Adapter
 
 The Metadata Adapter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
+A confirmation response is sent by NotifyUserMessage to the client.
 The communication to the Market Orders Simulator, through the Data Adapter, is handled here.
 
 It should not be used as a reference for a real case of client-originated message handling, as no guaranteed delivery and no clustering support is shown.
