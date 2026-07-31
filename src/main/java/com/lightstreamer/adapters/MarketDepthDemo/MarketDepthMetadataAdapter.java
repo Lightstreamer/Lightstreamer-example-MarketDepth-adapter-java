@@ -18,6 +18,7 @@ package com.lightstreamer.adapters.MarketDepthDemo;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.io.File;
@@ -25,103 +26,147 @@ import java.io.File;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lightstreamer.adapters.metadata.LiteralBasedProvider;
-import com.lightstreamer.interfaces.metadata.CreditsException;
-import com.lightstreamer.interfaces.metadata.MetadataProviderException;
-import com.lightstreamer.interfaces.metadata.NotificationException;
+import com.lightstreamer.adapter.common.InitException;
+import com.lightstreamer.adapter.metadata.CreditsException;
+import com.lightstreamer.adapter.metadata.LoginInfo;
+import com.lightstreamer.adapter.metadata.MessageException;
+import com.lightstreamer.adapter.metadata.MetadataAdapter;
+import com.lightstreamer.adapter.metadata.SessionRequestHandler;
+import com.lightstreamer.adapter.metadata.SubscriptionHandler;
+import com.lightstreamer.adapter.metadata.SubscriptionInfo;
 
-public class MarketDepthMetadataAdapter extends LiteralBasedProvider {
+public class MarketDepthMetadataAdapter implements MetadataAdapter {
+
+    private static final String LOGGER_CAT = "LS_demos_Logger.MarketDepthDemo.adapters";
 
     private Logger logger;
     
-    private static MarketDepthDataAdapter dataAdapter;
-    
+    private MarketDepthDataAdapter dataAdapter;
+
+    private String dataAdapterName;
+
+    private ExecutorService messageProcessingPool = Executors.newCachedThreadPool();
+
+    private Map<String, String> params;
+
     @Override
-    public void init(Map params, File configDir) throws MetadataProviderException {
+    public void init(Map<String, String> params, File configDir) throws InitException {
         
-        logger = LogManager.getLogger(Constants.LOGGER_CAT);
+        logger = LogManager.getLogger(LOGGER_CAT);
         
-        Constants.init(params);
-        
-        logger.debug("Rnd generator time (1): " + Constants.RND_GENERATOR_1);
-        logger.debug("Rnd generator time (2):" + Constants.RND_GENERATOR_2);
-        logger.debug("Rnd generator time (3): " + Constants.RND_GENERATOR_3);
-        logger.debug("Rnd generator time (4): " + Constants.RND_GENERATOR_4);
-        
+        this.params = params;
+
         logger.info("MarketDepth Demo Metadata Adapter start.");
     }
-    
-    public static void setDataDadapter(MarketDepthDataAdapter d) {
-        dataAdapter = d;
-    }
-    
 
     @Override
-    public boolean wantsTablesNotification(java.lang.String user) {
-        return false;
-    }
-
-    private static ExecutorService messageProcessingPool = Executors.newCachedThreadPool();
-
-    @Override
-    public CompletableFuture<String> notifyUserMessage(String user, String session, String message) throws CreditsException, NotificationException {
-
-        //NOTE: since the order processing is potentially blocking (in a real scenario), we have 
-        //configured a dedicated ExecutorService. Moreover, to provide backpressure to the Server
-        //when the number of pending operations is too high, we have properly configured the
-        //messages thread pool in the adapters.xml configuration file for this adapter.
-
-        if (message == null) {
-            logger.warn("Null message received");
-            throw new NotificationException("Null message received");
+    public void onDataAdapterAvailable(String dataAdapterName, Object dataAdapter) {
+        if (!(dataAdapter instanceof MarketDepthDataAdapter)) {
+            return;
         }
-        
-        CompletableFuture<String> future = new CompletableFuture<>();
-        messageProcessingPool.execute(() -> {
-            try {
-                String[] pieces = message.split("\\|");
-                this.handlePortfolioMessage(pieces);
-                future.complete("SUBMITTED");
-            } catch (PriceOutOfBoundException poobe) {
-                future.completeExceptionally(new CreditsException(-10025, poobe.getMessage()));
-            } catch (QtyOutOfBoundException qoobe) {
-                future.completeExceptionally(new CreditsException(-10026, qoobe.getMessage()));
-            } catch (RejectProposalException rpe) {
-                future.completeExceptionally(new CreditsException(-10027, rpe.getMessage()));
-            } catch (NumberFormatException nfe) {
-                future.completeExceptionally(new CreditsException(-10027, "Number Format Error " + nfe.getMessage()));
-            } catch (Throwable t) {
-                future.completeExceptionally(t);
+        if (this.dataAdapter != null) {
+            logger.warn("A MarketDepthDataAdapter instance is already available as \"" 
+                    + this.dataAdapterName + "\"; ignoring \"" + dataAdapterName + "\".");
+            return;
+        }
+        this.dataAdapterName = dataAdapterName;
+        this.dataAdapter = (MarketDepthDataAdapter) dataAdapter;
+        this.dataAdapter.configure(params);
+    }
+
+    @Override
+    public void onDataAdapterUnavailable(String dataAdapterName) {
+        if (dataAdapterName.equals(this.dataAdapterName)) {
+            this.dataAdapter = null;
+            this.dataAdapterName = null;
+        }
+    }
+
+    @Override
+    public CompletionStage<SessionRequestHandler> loginAsync(LoginInfo loginInfo) {
+        //////////////////////////////////////////////////////////////////////////
+        // WARNING: No authentication logic is implemented; any login is accepted.
+        // This is suitable for demos only and MUST NOT be used in production.
+        //////////////////////////////////////////////////////////////////////////
+        return CompletableFuture.completedFuture(new SessionRequestHandler() {
+
+            @Override
+            public Double getAllowedMaxBandwidth() {
+                return null;
             }
-            assert (future.isDone());
+
+            @Override
+            public CompletionStage<SubscriptionHandler> newSubscription(SubscriptionInfo info) {
+                return CompletableFuture.completedFuture(new SubscriptionHandler(info));
+            }
+
+            @Override
+            public CompletionStage<String> userMessageAsync(String message) throws CreditsException, MessageException {
+
+                //NOTE: since the order processing is potentially blocking (in a real scenario), we have 
+                //configured a dedicated ExecutorService. Moreover, to provide backpressure to the Server
+                //when the number of pending operations is too high, we have properly configured the
+                //messages thread pool in the adapters.xml configuration file for this adapter.
+
+                if (message == null) {
+                    logger.warn("Null message received");
+                    throw new MessageException("Null message received");
+                }
+                
+                CompletableFuture<String> future = new CompletableFuture<>();
+                messageProcessingPool.execute(() -> {
+                    try {
+                        String[] pieces = message.split("\\|");
+                        handlePortfolioMessage(pieces);
+                        future.complete("SUBMITTED");
+                    } catch (PriceOutOfBoundException poobe) {
+                        future.completeExceptionally(new CreditsException(-10025, poobe.getMessage()));
+                    } catch (QtyOutOfBoundException qoobe) {
+                        future.completeExceptionally(new CreditsException(-10026, qoobe.getMessage()));
+                    } catch (RejectProposalException rpe) {
+                        future.completeExceptionally(new CreditsException(-10027, rpe.getMessage()));
+                    } catch (NumberFormatException nfe) {
+                        future.completeExceptionally(new CreditsException(-10027, "Number Format Error " + nfe.getMessage()));
+                    } catch (MessageException me) {
+                        future.completeExceptionally(me);
+                    } catch (Throwable t) {
+                        future.completeExceptionally(t);
+                    }
+                    assert (future.isDone());
+                });
+
+                return future;
+            }
+
+            private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException, NumberFormatException, MessageException {
+                
+                if ( splits.length == 4 ) {
+                    double priceP = 0.0;
+                    long qtyP = 0;
+
+                    logger.info("New trading proposal: " + splits[0] + ", " + splits[1] + ", " + splits[2]);   
+
+                    priceP = Double.parseDouble(splits[3]);
+
+                    qtyP = Long.parseLong(splits[2]);
+
+                    String op = splits[0];
+                    if (op.equals("BUY") || op.equals("SELL")) {
+                        dataAdapter.newTradingProposal(splits[1], priceP, qtyP, op.equals("BUY"));
+                    } else {
+                        throw new MessageException("Wrong operation received");
+                    }
+                } else {
+                    logger.warn("Wrong formatted message received. No pieces: " + splits.length);
+                    throw new MessageException("Wrong message received");
+                }
+            }
         });
-
-        return future;
     }
-    
-    private void handlePortfolioMessage(String[] splits) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException, NumberFormatException, NotificationException {
-        
-        if ( splits.length == 4 ) {
-            double priceP = 0.0;
-            long qtyP = 0;
 
-            logger.info("New trading proposal: " + splits[0] + ", " + splits[1] + ", " + splits[2]);   
-
-            priceP = new Double(splits[3]).doubleValue();
-
-            qtyP = new Long(splits[2]).longValue();
-
-            String op = splits[0];
-            if (op.equals("BUY") || op.equals("SELL")) {
-                dataAdapter.newTradingProposal(splits[1], priceP, qtyP, op.equals("BUY"));
-            } else {
-                throw new NotificationException("Wrong operation received");
-            }
-        } else {
-            logger.warn("Wrong formatted message received. No pieces: " + splits.length);
-            throw new NotificationException("Wrong message received");
-        }
+    @Override
+    public void shutdown() {
+        messageProcessingPool.shutdown();
     }
 
 }
-

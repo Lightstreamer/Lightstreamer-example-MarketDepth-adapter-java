@@ -20,7 +20,7 @@ import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.lightstreamer.adapters.MarketDepthDemo.Constants;
+
 
 public class OrderGenerator {
     
@@ -59,7 +59,7 @@ public class OrderGenerator {
             rnd = myGenerator.nextDouble();    
         }
         
-        return new OrderBuy(Math.ceil(base*rnd)/100, myGenerator.nextInt(((int)Constants.MAX_QTY)));
+        return new OrderBuy(Math.ceil(base*rnd)/100, myGenerator.nextInt(((int)Stock.MAX_QTY)));
     }
     
     public OrderSell initSellOrder() {
@@ -71,7 +71,7 @@ public class OrderGenerator {
             rnd = myGenerator.nextDouble() + 1.0;    
         }
         
-        return new OrderSell(Math.ceil(base*rnd)/100, myGenerator.nextInt(((int)Constants.MAX_QTY)));
+        return new OrderSell(Math.ceil(base*rnd)/100, myGenerator.nextInt(((int)Stock.MAX_QTY)));
     }
 
     public OrderBase negOrder() {
@@ -98,7 +98,7 @@ public class OrderGenerator {
                 newPrice = 200.0;
             }
              
-            return new OrderBuy(newPrice, myGenerator.nextInt(((int)Constants.MAX_QTY)));
+            return new OrderBuy(newPrice, myGenerator.nextInt(((int)Stock.MAX_QTY)));
         } else {
             // SELL ORDER
             
@@ -115,7 +115,7 @@ public class OrderGenerator {
                 newPrice = 200.0;
             }
             
-            return new OrderSell(newPrice, myGenerator.nextInt(((int)Constants.MAX_QTY)));
+            return new OrderSell(newPrice, myGenerator.nextInt(((int)Stock.MAX_QTY)));
         }
     }
     

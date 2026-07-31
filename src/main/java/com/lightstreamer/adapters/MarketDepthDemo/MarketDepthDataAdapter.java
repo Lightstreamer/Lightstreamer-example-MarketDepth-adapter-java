@@ -21,183 +21,255 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lightstreamer.interfaces.data.DataProviderException;
-import com.lightstreamer.interfaces.data.ItemEventListener;
-import com.lightstreamer.interfaces.data.SmartDataProvider;
-import com.lightstreamer.interfaces.data.SubscriptionException;
+import com.lightstreamer.adapter.common.InitException;
+import com.lightstreamer.adapter.common.Mode;
+import com.lightstreamer.adapter.data.DataAdapter;
+import com.lightstreamer.adapter.data.ItemListener;
+import com.lightstreamer.adapter.data.ItemManager;
+import com.lightstreamer.adapter.data.SubscriptionException;
 import com.lightstreamer.adapters.MarketDepthDemo.orders_simulator.*;
 
-public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
+public class MarketDepthDataAdapter implements DataAdapter, MarketMaker {
     
+    private static final String LOGGER_CAT = "LS_demos_Logger.MarketDepthDemo.adapters";
+
+    private static final String BUY_SUFFIX = "_BUYSIDE";
+    
+    private static final String SELL_SUFFIX = "_SELLSIDE";
+
     private Logger logger;
-    
-    private ItemEventListener listener;
     
     private Map<String, Stock> availableStocks;
     
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
-    public void init(Map params, File configDir) throws DataProviderException {
+    public void init(Map<String, String> params, File configDir) throws InitException {
         
-        logger = LogManager.getLogger(Constants.LOGGER_CAT);
+        logger = LogManager.getLogger(LOGGER_CAT);
+
+        logger.info("MarketDepth Demo Data Adapter start.");
+    }
+
+    public void configure(Map<String, String> params) {
+
+        long tradingDayLasting = 750;
+        long rndGenerator1 = 70;
+        long rndGenerator2 = 700;
+        long rndGenerator3 = 7000;
+        long rndGenerator4 = 25000;
+
+        if (params.containsKey("TRADING_DAY_LASTING")) {
+            tradingDayLasting = Long.parseLong(params.get("TRADING_DAY_LASTING"));
+        }
+        if (params.containsKey("RND_GENERATOR_SUPERFAST")) {
+            rndGenerator1 = Long.parseLong(params.get("RND_GENERATOR_SUPERFAST"));
+        }
+        if (params.containsKey("RND_GENERATOR_FAST")) {
+            rndGenerator2 = Long.parseLong(params.get("RND_GENERATOR_FAST"));
+        }
+        if (params.containsKey("RND_GENERATOR_REGULAR")) {
+            rndGenerator3 = Long.parseLong(params.get("RND_GENERATOR_REGULAR"));
+        }
+        if (params.containsKey("RND_GENERATOR_SLOW")) {
+            rndGenerator4 = Long.parseLong(params.get("RND_GENERATOR_SLOW"));
+        }
+
+        logger.debug("Rnd generator time (1): " + rndGenerator1);
+        logger.debug("Rnd generator time (2): " + rndGenerator2);
+        logger.debug("Rnd generator time (3): " + rndGenerator3);
+        logger.debug("Rnd generator time (4): " + rndGenerator4);
         
         availableStocks = new HashMap<String, Stock>();
         
-        availableStocks.put("SF_TECH", new Stock("SF_TECH","SuperFast Tech.",logger, this, Constants.RND_GENERATOR_1));
+        availableStocks.put("SF_TECH", new Stock("SF_TECH","SuperFast Tech.",logger, this, rndGenerator1, tradingDayLasting));
         
-        availableStocks.put("AXY_COMP", new Stock("AXY_COMP","AXY COMPANY Ltd",logger, this, Constants.RND_GENERATOR_2));
+        availableStocks.put("AXY_COMP", new Stock("AXY_COMP","AXY COMPANY Ltd",logger, this, rndGenerator2, tradingDayLasting));
         
-        availableStocks.put("BTTQ_I", new Stock("BTTQ_I", "BTTQ Industries Sa",logger, this, Constants.RND_GENERATOR_3));
+        availableStocks.put("BTTQ_I", new Stock("BTTQ_I", "BTTQ Industries Sa",logger, this, rndGenerator3, tradingDayLasting));
         
-        availableStocks.put("OS_C", new Stock("OS_C", "Old&Slow Company ...",logger, this, Constants.RND_GENERATOR_4));
-        
-        
-        MarketDepthMetadataAdapter.setDataDadapter(this);
-        
-        logger.info("MarketDepth Demo Data Adapter start.");
+        availableStocks.put("OS_C", new Stock("OS_C", "Old&Slow Company ...",logger, this, rndGenerator4, tradingDayLasting));
     }
-    
+
     @Override
-    public void setListener(ItemEventListener listener) {
-     // Save the update listener
-     this.listener = listener;
-     }
-    
-    @Override
-    public boolean isSnapshotAvailable(String arg0) throws SubscriptionException {
-        // We have always the snapshot available from our feed
-        return true;
-    }
-    
-    @Override
-    public void subscribe(String item, Object handle, boolean arg2)
+    public CompletionStage<ItemManager> getItemManager(String itemName)
             throws SubscriptionException {
         
-        logger.debug("Received subscribe request for item: " + item + ".");
+        logger.debug("Received subscribe request for item: " + itemName + ".");
         
-        if (availableStocks.containsKey(item)) {
-            Stock myStock = availableStocks.get(item);
-            this.listener.smartUpdate(handle, myStock.synUpdate() , true);
-            this.listener.smartEndOfSnapshot(handle);
-            myStock.setLs_handle(handle);
-        } else if (item.endsWith(Constants.BUY_SUFFIX)) {
-            String k = item.substring(0, item.indexOf(Constants.BUY_SUFFIX));
+        if (availableStocks.containsKey(itemName)) {
+            return CompletableFuture.completedFuture(new MarketDepthItemManager(itemName, Mode.MERGE));
+        } else if (itemName.endsWith(BUY_SUFFIX)) {
+            String k = itemName.substring(0, itemName.indexOf(BUY_SUFFIX));
             if (availableStocks.containsKey(k)) {
-                Stock myStock = availableStocks.get(k);
-                sendBuyOrderSnapshot(myStock.getBuyOrders(),handle);
-                myStock.setLs_buy_handle(handle);
+                return CompletableFuture.completedFuture(new MarketDepthItemManager(itemName, Mode.COMMAND));
+            }
+        } else if (itemName.endsWith(SELL_SUFFIX)) {
+            String k = itemName.substring(0, itemName.indexOf(SELL_SUFFIX));
+            if (availableStocks.containsKey(k)) {
+                return CompletableFuture.completedFuture(new MarketDepthItemManager(itemName, Mode.COMMAND));
+            }
+        }
+        
+        logger.warn("" + itemName + " item unrecognized.");
+        CompletableFuture<ItemManager> f = new CompletableFuture<>();
+        f.completeExceptionally(new SubscriptionException("No such item: " + itemName));
+        return f;
+    }
+
+    @Override
+    public void shutdown() {
+        for (Stock stock : availableStocks.values()) {
+            stock.stopSimulator();
+        }
+        executor.shutdown();
+    }
+
+    private class MarketDepthItemManager implements ItemManager {
+        private final String itemName;
+        private final Mode mode;
+        private volatile ItemListener listener;
+
+        MarketDepthItemManager(String itemName, Mode mode) {
+            this.itemName = itemName;
+            this.mode = mode;
+        }
+
+        @Override
+        public Mode getSupportedMode() {
+            return mode;
+        }
+
+        @Override
+        public boolean isSnapshotAvailable() {
+            // We have always the snapshot available from our feed
+            return true;
+        }
+
+        @Override
+        public CompletionStage<Void> subscribe(ItemListener listener) {
+            this.listener = listener;
+            if (availableStocks.containsKey(itemName)) {
+                Stock myStock = availableStocks.get(itemName);
+                listener.snapshot(myStock.synUpdate(), null);
+                myStock.setLs_handle(listener);
+            } else if (itemName.endsWith(BUY_SUFFIX)) {
+                String k = itemName.substring(0, itemName.indexOf(BUY_SUFFIX));
+                if (availableStocks.containsKey(k)) {
+                    Stock myStock = availableStocks.get(k);
+                    sendBuyOrderSnapshot(myStock.getBuyOrders(), listener);
+                    myStock.setLs_buy_handle(listener);
+                    
+                    myStock.startSimulation();
+                }
+            } else if (itemName.endsWith(SELL_SUFFIX)) {
+                String k = itemName.substring(0, itemName.indexOf(SELL_SUFFIX));
+                if (availableStocks.containsKey(k)) {
+                    Stock myStock = availableStocks.get(k);
+                    sendSellOrderSnapshot(myStock.getSellOrders(), listener);
+                    myStock.setLs_sell_handle(listener);
+                }
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+
+        @Override
+        public CompletionStage<Void> unsubscribe() {
+            this.listener = null;
+            logger.debug("Received unsubscribe request for item: " + itemName + ".");
+            
+            if (availableStocks.containsKey(itemName)) {
+                (availableStocks.get(itemName)).setLs_handle(null);
+                (availableStocks.get(itemName)).stopSimulator();
+            } else if (itemName.endsWith(BUY_SUFFIX)) {
+                String k = itemName.substring(0, itemName.indexOf(BUY_SUFFIX));
+                if (availableStocks.containsKey(k)) {
+                    (availableStocks.get(k)).setLs_buy_handle(null);
+                }
+            } else if (itemName.endsWith(SELL_SUFFIX)) {
+                String k = itemName.substring(0, itemName.indexOf(SELL_SUFFIX));
+                if (availableStocks.containsKey(k)) {
+                    (availableStocks.get(k)).setLs_sell_handle(null);
+                }
+            }
+            return CompletableFuture.completedFuture(null);
+        }
+
+        private void sendBuyOrderSnapshot(Iterator<OrderBuy> list, ItemListener itemListener) {
+            
+            if ( itemListener == null ) {
+                return ;
+            }
+
+            final ItemListener l = itemListener;
+
+            while ( list.hasNext() ) {
+                OrderBuy ob = list.next();
+                final HashMap<String, String> update = new HashMap<String, String>();
+            
+                update.put(ItemListener.COMMAND_FIELD, ItemListener.ADD_COMMAND);
+                update.put(ItemListener.KEY_FIELD, ""+ob.getPrice());
+                update.put("qty", ""+ob.getQuantity());
                 
-                myStock.startSimulation();
+                logger.debug("ADD command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
+                
+                // If we have a listener create a new Runnable to be used as a task to pass the new update to the listener
+                Runnable updateTask = new Runnable() {
+                    @Override
+                    public void run() {                   
+                        l.snapshot(update, null);
+                    }
+                };
+
+                // We add the task on the executor to pass to the listener the actual status
+                executor.execute(updateTask);
             }
-        } else if (item.endsWith(Constants.SELL_SUFFIX)) {
-            String k = item.substring(0, item.indexOf(Constants.SELL_SUFFIX));
-            if (availableStocks.containsKey(k)) {
-                Stock myStock = availableStocks.get(k);
-                sendSellOrderSnapshot(myStock.getSellOrders(),handle);
-                myStock.setLs_sell_handle(handle);
+            
+            // Signal end of snapshot for COMMAND mode
+            executor.execute(() -> l.endOfSnapshot());
+        }
+
+        private void sendSellOrderSnapshot(Iterator<OrderSell> list, ItemListener itemListener) {
+            
+            if ( itemListener == null ) {
+                return ;
             }
-        } else {
-            logger.warn("" + item + " item unrecognized.");
-        }
-        
-        return ;
-    }
-
-    @Override
-    public void unsubscribe(String item)
-            throws SubscriptionException {
-        
-        logger.debug("Received unsubscribe request for item: " + item + ".");
-        
-        if (availableStocks.containsKey(item)) {
-            (availableStocks.get(item)).setLs_handle(null);
-            (availableStocks.get(item)).stopSimulator();
-        }
-        
-        return ;
-    }
-    
-    @Override
-    public void subscribe(String portfolioId, boolean arg1) {
-        //  Never called on a SmartDataProvider
-        assert(false);
-    }
-    
-    private void sendBuyOrderSnapshot(Iterator<OrderBuy> list, Object handle) {
-        
-        if ( handle == null ) {
-            return ;
-        }
-        if ( listener == null ) {
-            return ;
-        }
-
-        final Object h = handle;
-
-        while ( list.hasNext() ) {
-            OrderBuy ob = list.next();
-            final HashMap<String, String> update = new HashMap<String, String>();
-        
-            update.put("command", "ADD");
-            update.put("key", ""+ob.getPrice());
-            update.put("qty", ""+ob.getQuantity());
             
-            logger.debug("ADD command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
+            final ItemListener l = itemListener;
             
-            // If we have a listener create a new Runnable to be used as a task to pass the new update to the listener
-            Runnable updateTask = new Runnable() {
-                @Override
-                public void run() {                   
-                    listener.smartUpdate(h, update, true);
-                }
-            };
-
-            // We add the task on the executor to pass to the listener the actual status
-            executor.execute(updateTask);
-        }
-        
-    }
-
-    private void sendSellOrderSnapshot(Iterator<OrderSell> list, Object handle) {
-        
-        if ( handle == null ) {
-            return ;
-        }
-        if ( listener == null ) {
-            return ;
-        }
-        
-        final Object h = handle;
-        
-        while ( list.hasNext() ) {
-            OrderSell os = list.next();
-            final HashMap<String, String> update = new HashMap<String, String>();
-        
-            update.put("command", "ADD");
-            update.put("key", ""+os.getPrice());
-            update.put("qty", ""+os.getQuantity());
+            while ( list.hasNext() ) {
+                OrderSell os = list.next();
+                final HashMap<String, String> update = new HashMap<String, String>();
             
-            logger.debug("ADD command for sell order " + os.getPrice() + " x " + os.getQuantity());
+                update.put(ItemListener.COMMAND_FIELD, ItemListener.ADD_COMMAND);
+                update.put(ItemListener.KEY_FIELD, ""+os.getPrice());
+                update.put("qty", ""+os.getQuantity());
+                
+                logger.debug("ADD command for sell order " + os.getPrice() + " x " + os.getQuantity());
+                
+                //If we have a listener create a new Runnable to be used as a task to pass the new update to the listener
+                Runnable updateTask = new Runnable() {
+                    @Override
+                    public void run() {                   
+                        l.snapshot(update, null);
+                    }
+                };
+
+                //We add the task on the executor to pass to the listener the actual status
+                executor.execute(updateTask);
+            }
             
-            //If we have a listener create a new Runnable to be used as a task to pass the new update to the listener
-            Runnable updateTask = new Runnable() {
-                @Override
-                public void run() {                   
-                    listener.smartUpdate(h, update, true);
-                }
-            };
-
-            //We add the task on the executor to pass to the listener the actual status
-            executor.execute(updateTask);
+            // Signal end of snapshot for COMMAND mode
+            executor.execute(() -> l.endOfSnapshot());
         }
-
     }
     
     public void newTradingProposal(String symbol, double price, long qty, boolean buy) throws PriceOutOfBoundException, RejectProposalException, QtyOutOfBoundException {
@@ -220,25 +292,27 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
                 return ;
             }
 
-            update.put("command", "ADD");
-            update.put("key", ""+ob.getPrice());
+            update.put(ItemListener.COMMAND_FIELD, ItemListener.ADD_COMMAND);
+            update.put(ItemListener.KEY_FIELD, ""+ob.getPrice());
             update.put("qty", ""+ob.getQuantity());
             
             if (ob instanceof OrderBuy ) {
                 logger.debug("ADD command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                if ( myStock.getLs_buy_handle() != null ) {
-                    listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                ItemListener buyListener = myStock.getLs_buy_handle();
+                if ( buyListener != null ) {
+                    buyListener.update(update);
                 }    
             } else {
                 logger.debug("ADD command for sell order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                if ( myStock.getLs_sell_handle() != null ) {
-                    listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                ItemListener sellListener = myStock.getLs_sell_handle();
+                if ( sellListener != null ) {
+                    sellListener.update(update);
                 }
             }
             
-            listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+            myStock.getLs_handle().update(myStock.synUpdate());
         }
     }
     
@@ -248,21 +322,23 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
             Stock myStock = availableStocks.get(symbol);
             final HashMap<String, String> update = new HashMap<String, String>();
 
-            update.put("command", "UPDATE");
-            update.put("key", ""+ob.getPrice());
+            update.put(ItemListener.COMMAND_FIELD, ItemListener.UPDATE_COMMAND);
+            update.put(ItemListener.KEY_FIELD, ""+ob.getPrice());
             update.put("qty", ""+ob.getQuantity());
             
             if (ob instanceof OrderBuy ) {
                 logger.debug("UPDATE command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                if ( myStock.getLs_buy_handle() != null ) {
-                    listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                ItemListener buyListener = myStock.getLs_buy_handle();
+                if ( buyListener != null ) {
+                    buyListener.update(update);
                 }
             } else {
                                 
                 logger.debug("UPDATE command for sell order " + ob.getPrice() + " x " + ob.getQuantity());
-                if ( myStock.getLs_sell_handle() != null ) {
-                    listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                ItemListener sellListener = myStock.getLs_sell_handle();
+                if ( sellListener != null ) {
+                    sellListener.update(update);
                 }
             }
         }
@@ -278,24 +354,26 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
                 return ;
             }
 
-            update.put("command", "DELETE");
-            update.put("key", ""+ ob.getPrice());
+            update.put(ItemListener.COMMAND_FIELD, ItemListener.DELETE_COMMAND);
+            update.put(ItemListener.KEY_FIELD, ""+ ob.getPrice());
         
             if (ob instanceof OrderSell ) {
                 logger.debug("DELETE command for sell order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                if ( myStock.getLs_sell_handle() != null ) {
-                    listener.smartUpdate(myStock.getLs_sell_handle(), update, false);
+                ItemListener sellListener = myStock.getLs_sell_handle();
+                if ( sellListener != null ) {
+                    sellListener.update(update);
                 }
             } else {
                 logger.debug("DELETE command for buy order " + ob.getPrice() + " x " + ob.getQuantity());
                 
-                if ( myStock.getLs_buy_handle() != null ) {
-                    listener.smartUpdate(myStock.getLs_buy_handle(), update, false);
+                ItemListener buyListener = myStock.getLs_buy_handle();
+                if ( buyListener != null ) {
+                    buyListener.update(update);
                 }
             }
             
-            listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+            myStock.getLs_handle().update(myStock.synUpdate());
         }
     }
     
@@ -306,7 +384,7 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
         logger.debug("Syn update for " + symbol + ".");
         
         if ( myStock.getLs_handle() != null ) {
-            listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+            myStock.getLs_handle().update(myStock.synUpdate());
         }
         
         // For Time&Sales push of the new deal.
@@ -318,18 +396,20 @@ public class MarketDepthDataAdapter implements SmartDataProvider, MarketMaker {
         
         if (myStock != null ) {
             if ( myStock.getLs_handle() != null ) {
-                listener.smartUpdate(myStock.getLs_handle(), myStock.synUpdate(), false);
+                myStock.getLs_handle().update(myStock.synUpdate());
             }
         
-            if ( myStock.getLs_buy_handle() != null ) {
+            ItemListener buyListener = myStock.getLs_buy_handle();
+            if ( buyListener != null ) {
                 logger.info("Buy side " + myStock.getSymbol() + ": clearSnapshot.");
                 
-                listener.smartClearSnapshot(myStock.getLs_buy_handle());
+                buyListener.clearSnapshot();
             }
-            if ( myStock.getLs_sell_handle() != null ) {
+            ItemListener sellListener = myStock.getLs_sell_handle();
+            if ( sellListener != null ) {
                 logger.info("Sell side " + myStock.getSymbol() + ": clearSnapshot.");
                 
-                listener.smartClearSnapshot(myStock.getLs_sell_handle());
+                sellListener.clearSnapshot();
             }
         }
     }

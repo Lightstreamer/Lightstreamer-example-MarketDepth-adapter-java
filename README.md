@@ -20,14 +20,14 @@ The project is comprised of source code and a deployment example. The main eleme
 
 #### The Data Adapter
 
-The Data Adapter is implemented by the *MarketDepthDataAdapter* class. The class implement two interfaces:
-- *SmartDataProvider* that concerns relations with <b>Lightstreamer server</b>;
-- *MarketMaker* that models a very simple set of possible events from the trading market.
+The Data Adapter is implemented by the *MarketDepthDataAdapter* class. The class implements two interfaces:
+- `DataAdapter` that concerns relations with **Lightstreamer Server**;
+- `MarketMaker` that models a very simple set of possible events from the trading market.
 
 #### The Metadata Adapter
 
-The Metadata Adapter is implemented by the *MarketDepthMetadataAdapter* class. The class inherits from the reusable [LiteralBasedProvider](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter) and just adds a simple support for order entry by implementing the NotifyUserMessage method, to handle "sendMessage" requests from the client.
-A confirmation response is sent by NotifyUserMessage to the client.
+The Metadata Adapter is implemented by the *MarketDepthMetadataAdapter* class. The class implements `MetadataAdapter` directly, with no authentication logic (suitable for demos only), and adds a simple support for order entry by implementing the `userMessageAsync` method, to handle "sendMessage" requests from the client.
+A confirmation response is sent by `userMessageAsync` to the client.
 The communication to the Market Orders Simulator, through the Data Adapter, is handled here.
 
 It should not be used as a reference for a real case of client-originated message handling, as no guaranteed delivery and no clustering support is shown.
@@ -59,6 +59,9 @@ The `adapters.xml` file for the Market Depth Demo, should look like this:
 
     <metadata_provider>
         <adapter_class>com.lightstreamer.adapters.MarketDepthDemo.MarketDepthMetadataAdapter</adapter_class>
+
+        <!-- Ensure compatibility with old versions of the demo Clients. -->
+        <support_LiteralBased_subscriptions>Y</support_LiteralBased_subscriptions>
         
         <!-- configure the dedicated pool for notifyUserMessage call, see source code of MarketDepthMetadataAdapter -->
         <messages_pool>
@@ -122,12 +125,12 @@ Assuming Maven is installed and available in your path you can build the demo by
 
 ### Related Projects
 
-* [LiteralBasedProvider Metadata Adapter](https://github.com/Lightstreamer/Lightstreamer-lib-adapter-java-inprocess#literalbasedprovider-metadata-adapter)
 * [Lightstreamer - Stock-List Demos - HTML Clients](https://github.com/Lightstreamer/Lightstreamer-example-StockList-client-javascript)
 * [Lightstreamer - Portfolio Demos - HTML Clients](https://github.com/Lightstreamer/Lightstreamer-example-Portfolio-client-javascript)
 
 ## Lightstreamer Compatibility Notes
 
-- Compatible with Lightstreamer SDK for Java In-Process Adapters since version 8.0.
+- Compatible with Lightstreamer SDK for Java In-Process Adapters since version 9.0.
+- For a version of this example compatible with Lightstreamer SDK for Java In-Process Adapters versions 8.x, please refer to [this tag](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/tree/XXXXXXXXXXXXXXXXXXXXX).
 - For a version of this example compatible with Lightstreamer SDK for Java Adapters versions 7.3 to 7.4, please refer to [this tag](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/tree/last_for_interface_7.4.x).
 - For a version of this example compatible with Lightstreamer SDK for Java Adapters version 6.0, please refer to [this tag](https://github.com/Lightstreamer/Lightstreamer-example-MarketDepth-adapter-java/tree/pre_mvn).

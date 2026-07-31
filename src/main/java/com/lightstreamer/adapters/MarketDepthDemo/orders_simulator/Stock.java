@@ -27,13 +27,17 @@ import java.util.TreeSet;
 
 import org.apache.logging.log4j.Logger;
 
-import com.lightstreamer.adapters.MarketDepthDemo.Constants;
+import com.lightstreamer.adapter.data.ItemListener;
 import com.lightstreamer.adapters.MarketDepthDemo.MarketMaker;
 import com.lightstreamer.adapters.MarketDepthDemo.PriceOutOfBoundException;
 import com.lightstreamer.adapters.MarketDepthDemo.QtyOutOfBoundException;
 import com.lightstreamer.adapters.MarketDepthDemo.RejectProposalException;
     
 public class Stock {
+
+    public static final long MAX_QTY = 100000;
+    
+    public static final long FULL_BUCKET = 1000000;
 
     private Logger logger;
     
@@ -63,13 +67,15 @@ public class Stock {
     
     private final OrderGenerator myGenerator;
     
-    private Object ls_handle = null;
+    private ItemListener ls_handle = null;
 
-    private Object ls_buy_handle = null;
+    private ItemListener ls_buy_handle = null;
     
-    private Object ls_sell_handle = null;
+    private ItemListener ls_sell_handle = null;
     
     private MarketMaker listener = null;
+    
+    private long tradingDayLasting = 750;
     
     public String getSymbol() {
         return symbol;
@@ -83,36 +89,37 @@ public class Stock {
         return rnd_gen;
     }
     
-    public Object getLs_handle() {
+    public ItemListener getLs_handle() {
         return ls_handle;
     }
 
-    public void setLs_handle(Object ls_handle) {
+    public void setLs_handle(ItemListener ls_handle) {
         this.ls_handle = ls_handle;
     }
 
-    public Object getLs_buy_handle() {
+    public ItemListener getLs_buy_handle() {
         return ls_buy_handle;
     }
 
-    public void setLs_buy_handle(Object ls_buy_handle) {
+    public void setLs_buy_handle(ItemListener ls_buy_handle) {
         this.ls_buy_handle = ls_buy_handle;
     }
 
-    public Object getLs_sell_handle() {
+    public ItemListener getLs_sell_handle() {
         return ls_sell_handle;
     }
 
-    public void setLs_sell_handle(Object ls_sell_handle) {
+    public void setLs_sell_handle(ItemListener ls_sell_handle) {
         this.ls_sell_handle = ls_sell_handle;
     }
    
-    public Stock(String sym, String desc, Logger logger, MarketMaker mm, long rnd_gen) {
+    public Stock(String sym, String desc, Logger logger, MarketMaker mm, long rnd_gen, long tradingDayLasting) {
         this.symbol = sym;
         this.shortDescription = desc;
         this.logger = logger;
         this.listener = mm;
         this.rnd_gen = rnd_gen;
+        this.tradingDayLasting = tradingDayLasting;
         this.tradingPhase = "Opening Auction";
         
         generator = new Random(System.currentTimeMillis()*rnd_gen);
@@ -266,8 +273,8 @@ public class Stock {
     
     private void checkQtyOrder(long qty) throws QtyOutOfBoundException {
         
-        if (qty > Constants.MAX_QTY) {
-            throw new QtyOutOfBoundException();
+        if (qty > MAX_QTY) {
+            throw new QtyOutOfBoundException(MAX_QTY);
         }
         
         return ;
@@ -283,7 +290,7 @@ public class Stock {
                     Double key = new Double(newOrder.getPrice());
                 
                     if ( BuyOrders.containsKey(key)) {
-                        if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
+                        if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < FULL_BUCKET ) {
                             ((OrderBuy)(BuyOrders.get(key))).add(newOrder);
                             listener.orderLevelChange(symbol, (OrderBuy)(BuyOrders.get(key)));
                         }
@@ -316,7 +323,7 @@ public class Stock {
                         Double key = new Double(newOrder.getPrice());
                                                 
                         if ( BuyOrders.containsKey(key)) {
-                            if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
+                            if ( ((OrderBuy)(BuyOrders.get(key))).getQuantity() < FULL_BUCKET ) {
                                 ((OrderBuy)(BuyOrders.get(key))).add(newOrder);
                                 listener.orderLevelChange(symbol, (OrderBuy)(BuyOrders.get(key)));   
                             }
@@ -338,7 +345,7 @@ public class Stock {
                     Double key = new Double(newOrder.getPrice());
                     
                     if ( SellOrders.containsKey(key)) {
-                        if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
+                        if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < FULL_BUCKET ) {
                             ((OrderSell)(SellOrders.get(key))).add(newOrder);
                             listener.orderLevelChange(symbol, (OrderSell)(SellOrders.get(key)));
                         }
@@ -366,7 +373,7 @@ public class Stock {
                         Double key = new Double(newOrder.getPrice());
                                                 
                         if ( SellOrders.containsKey(key)) {
-                            if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < Constants.FULL_BUCKET ) {
+                            if ( ((OrderSell)(SellOrders.get(key))).getQuantity() < FULL_BUCKET ) {
                                 ((OrderSell)(SellOrders.get(key))).add(newOrder);
                                 listener.orderLevelChange(symbol, (OrderSell)(SellOrders.get(key)));
                             }
@@ -477,7 +484,7 @@ public class Stock {
     
     private boolean newExecution(long execQty, double price) {
         
-        if ( ExecList.size() > Constants.TRADING_DAY_LASTING) {
+        if ( ExecList.size() > tradingDayLasting) {
             // The duration of the trading day depends on the number of deals!?!?!?!?
             // Ok, it's just a demo.
             

@@ -18,16 +18,17 @@ package com.lightstreamer.adapters.MarketDepthDemo;
 
 public class QtyOutOfBoundException extends Exception {
 
-    public QtyOutOfBoundException() {
+    private final long maxQty;
+
+    public QtyOutOfBoundException(long maxQty) {
         super();
+        this.maxQty = maxQty;
     }
 
-
-    
     @Override
     public String getMessage() {
         
-        return "REJECT: Quantity exceeds limit (" + Constants.MAX_QTY +").";
+        return "REJECT: Quantity exceeds limit (" + maxQty +").";
     }
 
 }
